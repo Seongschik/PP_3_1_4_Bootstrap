@@ -1,12 +1,10 @@
 package ru.kata.spring.boot_security.demo.service;
 
-import org.apache.tomcat.util.buf.UEncoder;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import ru.kata.spring.boot_security.demo.Repository.RoleRepository;
 import ru.kata.spring.boot_security.demo.Repository.UserRepository;
@@ -25,6 +23,7 @@ public class UserService implements UserDetailsService {
     private final RoleRepository roleRepository;
     private final UserRepository userRepository;
 
+
     public UserService(RoleRepository roleRepository,
                        UserRepository userRepository) {
         this.roleRepository = roleRepository;
@@ -33,15 +32,19 @@ public class UserService implements UserDetailsService {
 
     @PostConstruct
     public void init() {
-        Role adminRole = new Role();
-        adminRole.setId(1L);
-        adminRole.setName("ADMIN");
-        roleRepository.save(adminRole);
+        Role adminRole = roleRepository.findByName("ADMIN");
+        if (adminRole == null) {
+            adminRole = new Role();
+            adminRole.setName("ADMIN");
+            roleRepository.save(adminRole);
+        }
 
-        Role userRole = new Role();
-        userRole.setId(2L);
-        userRole.setName("USER");
-        roleRepository.save(userRole);
+        Role userRole = roleRepository.findByName("USER");
+        if (userRole == null) {
+            userRole = new Role();
+            userRole.setName("USER");
+            roleRepository.save(userRole);
+        }
 
 //Создаю админа в таблице Юзер, проблема, в том, что если апдейтить, то юзернейм "умирает" и зайти обратно нельзя
         User adminUser = new User();
