@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="csrf-token" content="${_csrf.token}"/>
+    <title>All Users for Admin</title>
+    <style>
+        .full-height {
+            min-height: 100vh;
+        }
+
+        .bordered-table {
+            border-collapse: collapse;
+        }
+
+        .bordered-table th,
+        .bordered-table td {
+            border: 1px solid lightgray;
+        }
+
+        table {
+            caption-side: top;
+        }
+
+        .table-header {
+            font-size: 1.3rem;
+            background-color: #f0f0f0;
+        }
+
+        .transparent-btn {
+            background-color: transparent;
+            border: none;
+            color: #007bff;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .transparent-btn:hover {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .transparent-btn.active {
+            background-color: #007bff;
+            color: white;
+        }
+    </style>
+</head>
+<body class="bg-light">
+<header class="navbar bg-dark">
+    <span class="navbar-brand text-white">
+    <strong th:text="${user.username}"></strong>
+    <span th:text="' with role: '"></span>
+    <span th:each="role : ${user.roles}">
+    <span th:text="${role.name}"></span>
+    </span>
+</span>
+    <form th:action="@{/logout}" th:method="POST">
+        <button type="submit" class="btn btn-light"
+                style="background: transparent; border: transparent; color: lightgray">Logout
+        </button>
+    </form>
+</header>
+<div class="container-fluid">
+    <div class="row">
+
+        <!--        Левая колонка Left Column-->
+        <div class="col-md-2 bg-white full-height">
+            <ul class="nav flex-column text-left">
+                <li class="nav nav-pills nav-fill justify-content-between my-2">
+                    <a class="nav-link active w-100 transparent-btn" href="#" onclick="showAdminPanel(event);">Admin
+                        Panel</a>
+
+                </li>
+            </ul>
+            <ul class="nav flex-column text-left">
+                <li class="nav nav-pills nav-fill justify-content-between">
+                    <a class="nav-link active w-100 transparent-btn" href="" onclick="showUserView(event);">User</a>
+                </li>
+            </ul>
+        </div>
+        <!--        Конец левой колонки End of the left column-->
+
+        <div class="col-md-9">
+            <div id="contentContainer">
+                <div id="adminPanel">
+                    <div class="col-12 ml-4">
+                        <h1>Admin Panel</h1>
+                    </div>
+                    <div class="row">
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="table-responsive mt-3 ml-5">
+                                <div class="d-flex mb-2">
+                                    <div class="d-flex mb-2">
+                                        <input type="button" value="Users table"
+                                               class="transparent-btn btn-primary mr-2"
+                                               id="showUserTableBtn"/>
+                                        <input type="button" value="Add New User" class="transparent-btn btn-primary"
+                                               id="addNewUserBtn"/>
+                                    </div>
+                                </div>
+                                <table class="table table-striped text-center bordered-table" id="userTable">
+                                    <thead>
+                                    <tr class="bg-transparent">
+                                        <th colspan="9" class="text-black p-2 text-left table-header">
+                                            About user
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Username</th>
+                                        <th>First_Name</th>
+                                        <th>Last_Name</th>
+                                        <th>Salary</th>
+                                        <th>Department</th>
+                                        <th>Role</th>
+                                        <th>Edit</th>
+                                        <th>Delete</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr th:each="user : ${allUsers}">
+                                        <td th:text="${user.id}"></td>
+                                        <td th:text="${user.username}"></td>
+                                        <td th:text="${user.firstName}"></td>
+                                        <td th:text="${user.lastName}"></td>
+                                        <td th:text="${user.salary}"></td>
+                                        <td th:text="${user.department}"></td>
+                                        <td>
+                                        <span th:each="role : ${user.roles}">
+                                        <span th:text="${role.name}"></span>
+                                        </span>
+                                        </td>
+                                        <td>
+                                            <button type="button" class="btn btn-info" data-toggle="modal"
+                                                    data-target="#editModal" th:data-user-id="${user.getId()}"
+                                                    th:onclick="'openEditModal(' + ${user.getId()} + ')'">
+                                                Edit
+                                            </button>
+                                        </td>
+                                        <td>
+                                            <button type="button" class="btn btn-danger" data-toggle="modal"
+                                                    data-target="#deleteModal" th:data-user-id="${user.getId()}"
+                                                    th:onclick="'showDeleteModal(' + ${user.getId()} + ')'">
+                                                Delete
+                                            </button>
+                                        </td>
+                                </table>
+
+                                <!--                        Форма по созданию нового пользователя-->
+
+                                <div id="addUserForm" style="display:none; background-color: #f8f9fa;">
+                                    <div>
+                                        <h2 class="my-3 "><strong>Add New User</strong></h2>
+                                    </div>
+                                    <hr>
+                                    <div class="col-13">
+                                        <div class="text-center"
+                                             style="background-color: white; padding: 20px; border-radius: 5px;">
+                                            <form th:action="@{/admin/addNewUser}" th:object="${user}" method="post">
+                                                <!--                                        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>-->
+                                                <div id="content"></div>
+                                                <div>
+                                                    <label><strong>Username</strong></label>
+                                                    <br>
+                                                    <input type="text" th:field="*{username}" required/>
+                                                </div>
+                                                <br>
+                                                <div>
+                                                    <label><strong>First_Name:</strong></label>
+                                                    <br>
+                                                    <input type="text" th:field="*{firstName}" id="FirstName" required/>
+                                                </div>
+                                                <br>
+                                                <div>
+                                                    <label><strong>Last_Name:</strong></label>
+                                                    <br>
+                                                    <input type="text" th:field="*{lastName}" id="LastName" required/>
+                                                </div>
+                                                <br>
+                                                <div>
+                                                    <label><strong>Salary:</strong></label>
+                                                    <br>
+                                                    <input type="number" th:field="*{salary}" id="salary"/>
+                                                </div>
+                                                <br>
+                                                <div>
+                                                    <label><strong>Department:</strong></label>
+                                                    <br>
+                                                    <input type="text" th:field="*{department}" id="department"/>
+                                                </div>
+                                                <br>
+                                                <div class="form-group">
+                                                    <label><Strong>User Role:</Strong></label>
+                                                    <div style="width: 14%; border-radius: 5px;"
+                                                         class="d-flex justify-content-center mx-auto">
+                                                        <select multiple class="form-control w-100" th:field="*{roles}"
+                                                                id="EUserRole1">
+                                                            <option th:each="role: ${allRoles}" th:value="${role.id}"
+                                                                    th:text="${role.name}"></option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <br>
+                                                <div>
+                                                    <label><strong>Password:</strong></label>
+                                                    <br>
+                                                    <input type="password" th:field="*{password}" id="userPassword"/>
+                                                </div>
+                                                <br>
+                                                <input type="submit" value="Add New User" class="btn btn-success"/>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!--                        Вкладка User User Tab-->
+                <div id="userView" style="display:none;">
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="row">
+                                    <div class="col-12 ml-3">
+                                        <h1 class="mb-2 mt-2 ml-2">User Information Page</h1>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="table-responsive mt-3 ml-4">
+                                            <table class="table table-striped text-center bordered-table">
+                                                <thead>
+                                                <tr class="bg-transparent">
+                                                    <th colspan="7"
+                                                        class="text-black p-2 text-left table-header">
+                                                        About user
+                                                    </th>
+                                                </tr>
+                                                <tr>
+                                                    <th>ID</th>
+                                                    <th>Username</th>
+                                                    <th>First_Name</th>
+                                                    <th>Last_Name</th>
+                                                    <th>Occupation</th>
+                                                    <th>Income</th>
+                                                    <th>Role</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                <tr th:each="user : ${user}">
+                                                    <td th:text="${user.id}"></td>
+                                                    <td th:text="${user.username}"></td>
+                                                    <td th:text="${user.firstName}"></td>
+                                                    <td th:text="${user.lastName}"></td>
+                                                    <td th:text="${user.salary}"></td>
+                                                    <td th:text="${user.department}"></td>
+                                                    <td>
+                                                                <span th:each="role : ${user.roles}">
+                                                                <span th:text="${role.name}"></span>
+                                                                </span>
+                                                    </td>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!--                        Конец вкладки User-->
+
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Модальное окно для редактирования пользователя -->
+<div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editModalLabel">Edit User</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center" style="background-color: white; padding: 20px; border-radius: 5px;">
+                    <input type="hidden" id="EUserId"/>
+                    <input type="hidden" id="EUserRoleId"/>
+                    <input type="hidden" id="csrfToken" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+                    <div>
+                        <label><strong>Username</strong></label>
+                        <br>
+                        <input type="text" id="EUsername" required/>
+                    </div>
+                    <br>
+                    <div>
+                        <label><strong>First_Name:</strong></label>
+                        <br>
+                        <input type="text" id="EFirstName" required/>
+                    </div>
+                    <br>
+                    <div>
+                        <label><strong>Last_Name:</strong></label>
+                        <br>
+                        <input type="text" id="ELastName" required/>
+                    </div>
+                    <br>
+                    <div>
+                        <label><strong>Salary:</strong></label>
+                        <br>
+                        <input type="number" id="Esalary"/>
+                    </div>
+                    <br>
+                    <div>
+                        <label><strong>Department:</strong></label>
+                        <br>
+                        <input type="text" id="Edepartment"/>
+                    </div>
+                    <br>
+                    <div>
+                        <label><strong>User Role:</strong></label>
+                        <br>
+                        <div style="width: 47%; border-radius: 5px;"
+                             class="d-flex justify-content-center mx-auto">
+                            <select multiple class="form-control w-100" th:field="*{allRoles}"
+                                    id="EUserRole">
+                                <option th:each="role: ${allRoles}" th:value="${role.id}"
+                                        th:text="${role.name}"></option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label><strong>Password:</strong></label>
+                        <br>
+                        <input type="text" id="EuserPassword"/>
+                    </div>
+                    <br>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary" onclick="submitEditForm()">Edit</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно для удаления пользователя -->
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Delete User</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center"
+                     style="background-color: white; padding: 20px; border-radius: 5px;">
+                    <input type="hidden" id="DUserId"/>
+                    <div>
+                        <label><strong>Username</strong></label>
+                        <br>
+                        <input type="text" id="DUsername" readonly/>
+                    </div>
+                    <br>
+                    <div>
+                        <label><strong>First_Name:</strong></label>
+                        <br>
+                        <input type="text" id="DFirstName" readonly/>
+                    </div>
+                    <br>
+                    <div>
+                        <label><strong>Last_Name:</strong></label>
+                        <br>
+                        <input type="text" id="DLastName" readonly/>
+                    </div>
+                    <br>
+                    <div>
+                        <label><strong>Salary:</strong></label>
+                        <br>
+                        <input type="number" id="Dsalary" readonly/>
+                    </div>
+                    <br>
+                    <div>
+                        <label><strong>Department:</strong></label>
+                        <br>
+                        <input type="text" id="Ddepartment" readonly/>
+                    </div>
+                    <br>
+                    <div>
+                        <label><Strong>User Role:</Strong></label>
+                        <br>
+                        <input type="text" id="DUserRole" readonly/>
+                    </div>
+                    <br>
+                    <div>
+                        <label><strong>Password:</strong></label>
+                        <br>
+                        <input type="text" id="DuserPassword" readonly/>
+                    </div>
+                    <br>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-danger" id="deleteButton" data-user-id=""
+                        onclick="submitDeleteForm()">Delete
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    function addNewUser() {
+        var form = document.getElementById("addUserForm");
+        var content = document.getElementById("content");
+        var userTable = document.getElementById("userTable");
+
+        if (form.style.display === "none") {
+            form.style.display = "block";
+            userTable.style.display = "none"; // скрываем таблицу пользователей
+        } else {
+            form.style.display = "none";
+        }
+
+        // сброс значений полей формы
+        var inputs = form.querySelectorAll("input[type=text], input[type=password], input[type=number]");
+        for (var i = 0; i < inputs.length; i++) {
+            inputs[i].value = "";
+        }
+    }
+
+    function showUserTable() {
+        document.getElementById('userTable').style.display = 'table';
+        document.getElementById('addUserForm').style.display = 'none';
+    }
+
+    function toggleAddUserForm() {
+        const formDisplay = document.getElementById('addUserForm').style.display;
+        document.getElementById('userTable').style.display = formDisplay === 'none' ? 'none' : 'table';
+        document.getElementById('addUserForm').style.display = formDisplay === 'none' ? 'block' : 'none';
+    }
+
+    function showDeleteModal(userId) {
+        fetch(`/admin/getUserById/${userId}`)
+            .then(response => response.json())
+            .then(user => {
+                document.getElementById('DUserId').value = user.id;
+                document.getElementById('DUsername').value = user.username;
+                document.getElementById('DFirstName').value = user.firstName;
+                document.getElementById('DLastName').value = user.lastName;
+                document.getElementById('Dsalary').value = user.salary;
+                document.getElementById('Ddepartment').value = user.department;
+                document.getElementById('DUserRole').value = user.roles.map(role => role.name).join(', ');
+                document.getElementById('DuserPassword').value = user.password;
+
+                $('#deleteModal').modal('show');
+            });
+    }
+
+    async function submitDeleteForm() {
+        const userId = document.getElementById('DUserId').value;
+
+        try {
+            const response = await fetch(`/admin/deleteUser=${userId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                }
+            });
+
+            if (response.status === 200) {
+                window.location.reload();
+            } else {
+                alert('Failed to delete user');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Failed to delete user');
+        }
+    }
+
+    function openEditModal(userId) {
+        fetch(`/admin/getUserById/${userId}`)
+            .then(response => response.json())
+            .then(user => {
+                document.getElementById('EUserId').value = user.id;
+                document.getElementById('EUsername').value = user.username;
+                document.getElementById('EFirstName').value = user.firstName;
+                document.getElementById('ELastName').value = user.lastName;
+                document.getElementById('Esalary').value = user.salary;
+                document.getElementById('Edepartment').value = user.department;
+                document.getElementById('EUserRole').value = user.roles.map(role => role.name).join(', ');
+                document.getElementById('EuserPassword').value = user.password;
+
+                $('#editModal').modal('show');
+            });
+    }
+
+    function submitEditForm() {
+        // Получаем данные формы
+        const userId = $('#EUserId').val();
+        const username = $('#EUsername').val();
+        const firstName = $('#EFirstName').val();
+        const lastName = $('#ELastName').val();
+        const salary = $('#Esalary').val();
+        const department = $('#Edepartment').val();
+        const password = $('#EuserPassword').val();
+        const selectedRoles = $('#EUserRole option:selected');
+        if (selectedRoles.length === 0) {
+            alert('Пожалуйста, выберите хотя бы одну роль');
+            return;
+        }
+        const roles = Array.from(selectedRoles).map(option => ({
+            id: parseInt(option.value)
+        }));
+
+        // Создаем объект пользователя
+        const user = {
+            id: parseInt(userId),
+            username: username,
+            firstName: firstName,
+            lastName: lastName,
+            salary: parseInt(salary),
+            department: department,
+            password: password,
+            roles: roles
+        };
+
+        // Отправляем данные на сервер
+        fetch('/admin/editUser', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(user)
+        })
+            .then(response => {
+                if (response.ok) {
+                    // Закрываем модальное окно и обновляем страницу после успешного сохранения
+                    $('#editModal').modal('hide');
+                    location.reload();
+                } else {
+                    // Обрабатываем ошибку
+                    console.log('Error: ' + response.status + ' ' + response.statusText);
+                }
+            });
+    }
+
+    function setActiveButton(button) {
+        // Удаляем класс 'active' со всех кнопок
+        const buttons = document.querySelectorAll('.transparent-btn');
+        buttons.forEach(btn => btn.classList.remove('active'));
+
+        // Добавляем класс 'active' к выбранной кнопке
+        button.classList.add('active');
+    }
+
+    document.getElementById('showUserTableBtn').addEventListener('click', function () {
+        showUserTable();
+        setActiveButton(this);
+    });
+
+    document.getElementById('addNewUserBtn').addEventListener('click', function () {
+        addNewUser();
+        setActiveButton(this);
+    });
+
+    function showAdminPanel(event) {
+        if (event) {
+            event.preventDefault();
+        }
+        document.getElementById("adminPanel").style.display = "block";
+        document.getElementById("userView").style.display = "none";
+    }
+
+    function showUserView(event) {
+        event.preventDefault();
+        document.getElementById("adminPanel").style.display = "none";
+        document.getElementById("userView").style.display = "block";
+    }
+
+    showAdminPanel();
+
+</script>
+</body>
+</html>
