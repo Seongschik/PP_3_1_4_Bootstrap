@@ -1,37 +1,105 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en">
 <head>
-    <title>Spring Security Example</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <meta charset="UTF-8">
+    <title>User View</title>
+    <style>
+        .full-height {
+            min-height: 100vh;
+        }
+
+        .bordered-table {
+            border-collapse: collapse;
+        }
+
+        .bordered-table th,
+        .bordered-table td {
+            border: 1px solid lightgray;
+        }
+
+        table {
+            caption-side: top;
+        }
+
+        .table-header {
+            font-size: 1.3rem;
+            background-color: #f0f0f0;
+        }
+    </style>
 </head>
-<body>
-<header><form th:action="@{/logout}" th:method="POST">
-    <button type="submit" class="btn btn-dark text-right">Logout</button>
-</form>
+<body class="bg-light">
+<header class="navbar bg-dark">
+    <span class="navbar-brand text-white">
+    <strong th:text="${user.username}"></strong>
+    <span th:text="' with role: '"></span>
+    <span th:each="role : ${user.roles}">
+    <span th:text="${role.name}"></span>
+    </span>
+</span>
+    <form th:action="@{/logout}" th:method="POST">
+        <button type="submit" class="btn btn-light"
+                style="background: transparent; border: transparent; color: lightgray">Logout
+        </button>
+    </form>
 </header>
-<h1>User, welcome spring boot security page!</h1>
-<h2 th:utext="'Welcome ' + ${user.firstName}"></h2>
-<table>
-    <tr>
-        <td>Username:</td>
-        <td th:text="${user.username}"></td>
-    </tr>
-    <tr>
-        <td>First Name:</td>
-        <td th:text="${user.firstName}"></td>
-    </tr>
-    <tr>
-        <td>Last Name:</td>
-        <td th:text="${user.lastName}"></td>
-    </tr>
-    <tr>
-        <td>Salary:</td>
-        <td th:text="${user.salary}"></td>
-    </tr>
-    <tr>
-        <td>Department:</td>
-        <td th:text="${user.department}"></td>
-    </tr>
-</table>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-2 bg-white full-height">
+            <ul class="nav flex-column text-left">
+                <li class="nav nav-pills nav-fill justify-content-between my-3">
+                    <a class="nav-link active w-100" href="">User</a>
+                </li>
+            </ul>
+        </div>
+        <div class="col-md-9">
+            <div class="row">
+                <div class="col-12 ml-3">
+                    <h1 class="mb-2 mt-2 ml-2">User Information Page</h1>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12">
+                    <div class="table-responsive mt-3 ml-4">
+                        <table class="table table-striped text-center bordered-table">
+                            <thead>
+                            <tr class="bg-transparent">
+                                <th colspan="7" class="text-black p-2 text-left table-header">
+                                    About user
+                                </th>
+                            </tr>
+                            <tr>
+                                <th>ID</th>
+                                <th>Username</th>
+                                <th>First_Name</th>
+                                <th>Last_Name</th>
+                                <th>Occupation</th>
+                                <th>Income</th>
+                                <th>Role</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="user : ${user}">
+                                <td th:text="${user.id}"></td>
+                                <td th:text="${user.username}"></td>
+                                <td th:text="${user.firstName}"></td>
+                                <td th:text="${user.lastName}"></td>
+                                <td th:text="${user.salary}"></td>
+                                <td th:text="${user.department}"></td>
+                                <td>
+                                        <span th:each="role : ${user.roles}">
+                                        <span th:text="${role.name}"></span>
+                                        </span>
+                                </td>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 
 </body>
 </html>
