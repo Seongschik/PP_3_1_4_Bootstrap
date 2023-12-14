@@ -58,7 +58,7 @@ public class UserService implements UserDetailsService {
         adminUser.setSalary(1000);
         adminUser.setDepartment("IT");
         adminUser.setUsername("admin");
-        adminUser.setPassword("admin");
+        adminUser.setPassword(passwordEncoder.encode("admin"));
         adminUser.setRoles(Collections.singleton(adminRole));
 
         User userUser = new User();
@@ -68,9 +68,8 @@ public class UserService implements UserDetailsService {
         userUser.setSalary(0);
         userUser.setDepartment("factory");
         userUser.setUsername("user");
-        userUser.setPassword("user");
+        userUser.setPassword(passwordEncoder.encode("user"));
         userUser.setRoles(Collections.singleton(userRole));
-
 
         userRepository.save(adminUser);
         userRepository.save(userUser);
